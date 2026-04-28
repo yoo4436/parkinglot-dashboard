@@ -1,26 +1,17 @@
-import { useState } from 'react';
-import PaymentKiosk from './PaymentKiosk';
-import TestSimulator from './TestSimulator';
+import { Routes, Route } from 'react-router-dom';
+import Login from './Login';
+import Dashboard from './Dashboard';
 
 function App() {
-  const [view, setView] = useState('kiosk');
-
   return (
-    // ✨ 修正：拿掉寬度限制，讓它 100% 適應外層的 #root
-    <div style={{ width: '100%', padding: '20px', boxSizing: 'border-box' }}>
+    // Routes 就是我們的路由表
+    <Routes>
+      {/* 當網址是根目錄 '/' 時，顯示登入畫面 */}
+      <Route path="/" element={<Login />} />
       
-      {view === 'kiosk' ? <PaymentKiosk /> : <TestSimulator />}
-
-      <div style={{ marginTop: '30px', textAlign: 'center' }}>
-        <button 
-          onClick={() => setView(view === 'kiosk' ? 'simulator' : 'kiosk')}
-          style={{ background: 'none', border: 'none', color: '#999', cursor: 'pointer', fontSize: '14px', textDecoration: 'underline' }}
-        >
-          切換至 {view === 'kiosk' ? '開發者後台 (模擬進場)' : '前台繳費機'}
-        </button>
-      </div>
-
-    </div>
+      {/* 當網址是 '/dashboard' 時，顯示原本的繳費與測試機台 */}
+      <Route path="/dashboard" element={<Dashboard />} />
+    </Routes>
   );
 }
 
