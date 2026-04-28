@@ -5,14 +5,31 @@ export default function PaymentKiosk() {
   const [message, setMessage] = useState('');
   const [step, setStep] = useState(1);
 
+  const [fee, setFee] = useState(0); // 儲存查詢到的停車費用
+
   const handleQuery = () => {
     if (!plateNumber) {
       setMessage('請先輸入車牌號碼！');
       return;
     }
-    setMessage('');
-    setStep(2);
+
+    setMessage('查詢中，請稍候...');
+
+    fetch(`http://localhost:8080/api/parking/fee?plateNumber=${plateNumber}`)
+      .then(response => response.text())
+      .then(text => {
+        if (text === '查無車輛') {
+          setMessage('❌ 查無此車牌的進場紀錄，請確認後重新輸入。');
+        } else {
+          // 如果成功，text 會是金額字串（例如 "120" 或 "40"），我們把它轉成數字存起來
+          setFee(parseInt(text));
+          setMessage('');
+          setStep(2); // 查到金額後，才放行進入步驟 2
+        }
+      })
+      .catch(error => setMessage('❌ 查詢連線失敗，請洽管理員。'));
   };
+
 
   const handlePayment = (paymentMethod) => {
     setMessage(`處理中：正在使用 ${paymentMethod} 進行扣款...`);
@@ -89,9 +106,9 @@ export default function PaymentKiosk() {
         {step === 2 && (
           <div style={{ textAlign: 'center' }}>
             <h2 style={{ fontSize: '20px', color: '#666', marginBottom: '10px' }}>車牌：<span style={{ color: '#1890ff', fontWeight: 'bold' }}>{plateNumber}</span></h2>
-            <h1 style={{ fontSize: '64px', margin: '10px 0 20px', color: '#333' }}>$120</h1>
-            <p style={{ color: '#888', marginBottom: '40px', fontSize: '18px' }}>請選擇下方付款方式</p>
-            
+            <h1 style={{ fontSize: '64px', margin: '10px 0 20px', color: '#333' }}>${fee}</h1>
+            <p style={{ color: '#888', marginBottom: '40px', fontSize: '18px' }}>請選擇下方付款方式</p>  
+                      
             <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
               <button onClick={() => handlePayment('信用卡')} style={{ padding: '20px 10px', fontSize: '18px', cursor: 'pointer', borderRadius: '12px', flex: 1, border: '1px solid #ccc', backgroundColor: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', whiteSpace: 'nowrap', fontWeight: 'bold', boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>💳 信用卡</button>
               <button onClick={() => handlePayment('LINE Pay')} style={{ padding: '20px 10px', fontSize: '18px', cursor: 'pointer', borderRadius: '12px', flex: 1, backgroundColor: '#00c300', color: 'white', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', whiteSpace: 'nowrap', fontWeight: 'bold', boxShadow: '0 2px 5px rgba(0,195,0,0.3)' }}>📱 LINE Pay</button>
