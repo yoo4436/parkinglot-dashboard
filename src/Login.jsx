@@ -9,16 +9,32 @@ export default function Login() {
   // 這是 React Router 提供的超能力，用來切換網址
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault(); // 防止表單送出時重整網頁
+    setError(''); // 每次登入前先清空錯誤訊息
     
-    // 目前我們還沒接上 Java 後端，先寫死一組假帳號密碼來測試跳轉
-    if (account === 'admin' && password === '1234') {
-      setError('');
-      // 登入成功！跳轉到專屬儀表板
-      navigate('/dashboard');
-    } else {
-      setError('帳號或密碼錯誤，請重試！');
+    try {
+          // 呼叫我們用 Spring Boot 寫好的 API
+          const response = await fetch(`http://localhost:8080/api/auth/login?username=${account}&password=${password}`, {
+            method: 'POST',
+          });
+
+          if (response.ok) {
+            // 如果登入成功，解析回傳的 JSON (裡面會有一把 token)
+            const data = await response.json();
+            
+            // ✨ 關鍵：把 JWT 存進瀏覽器的 localStorage 裡，這樣重新整理網頁才不會被登出
+            localStorage.setItem('jwtToken', data.token);
+            
+            // 登入成功！跳轉到專屬儀表板
+            navigate('/dashboard');
+          } else {
+            // 抓取後端回傳的錯誤訊息 (例如 "帳號或密碼錯誤")
+            const errorText = await response.text();
+            setError(errorText || '登入失敗，請確認帳號密碼。');
+          }
+    } catch (err) {
+          setError('無法連線至伺服器，請確認後端是否已啟動。');
     }
   };
 

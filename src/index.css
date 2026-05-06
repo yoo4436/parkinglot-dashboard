@@ -1,4 +1,3 @@
-/* 1. 清除瀏覽器預設邊距，並給一個淡淡的灰色背景，讓白色的機台更立體 */
 body {
   margin: 0;
   padding: 0;
@@ -6,17 +5,12 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
 }
 
-/* 2. 讓整個網頁佔滿全螢幕，並使用 Flexbox 讓機台永遠保持在正中間 */
 #root {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  width: 100%; 
   box-sizing: border-box;
 }
 
-/* 3. 清除預設標題的 margin，方便我們自己控制間距 */
 h1, h2, p {
   margin: 0;
 }
