@@ -6,12 +6,24 @@ export default function TestSimulator() {
   const [message, setMessage] = useState('');
 
   const handleCheckIn = async () => {
-    setMessage(`處理中：準備讓 ${plateNumber} (${type}) 進場...`);
+    setMessage(`處理中：模擬車牌 ${plateNumber} (${type}) 進場中...`);
+
+    const token = localStorage.getItem('jwtToken');
+
     fetch(`http://localhost:8080/api/parking/checkIn?plateNumber=${plateNumber}&type=${type}`, {
       method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}` 
+      }
     })
-    .then(response => response.text()) 
-    .then(text => setMessage(`✅ ${text}`))
+    .then(async (response) => {
+      // 增加狀態檢查，如果被擋下來會拋出錯誤
+      if (!response.ok) {
+        throw new Error('權限不足或伺服器錯誤');
+      }
+      return response.text();
+    })
+    .then(text => setMessage(`系統回應: ${text}`))
     .catch(error => setMessage('❌ 發生錯誤，請確認後端伺服器是否開啟。'));
   };
 
